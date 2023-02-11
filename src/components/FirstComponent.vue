@@ -15,6 +15,7 @@
                                    <input
                                         v-model="inputTicket"
                                         v-on:focus="removeAlertMessage()" 
+                                        v-on:keydown.enter="addTicket()"
                                         type="text" name="wallet" id="wallet"
                                         class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
                                         placeholder="Например DOGE"
@@ -62,7 +63,7 @@
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
                               <div class="px-4 py-5 sm:p-6 text-center">
                                    <dt class="text-sm font-medium text-gray-500 truncate">
-                                        {{ tiket.name }}
+                                        BTC - {{ tiket.name }}
                                    </dt>
                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">
                                         {{ tiket.price }}
@@ -122,14 +123,18 @@ export default {
           addTicket() {
                let newTicket = {
                     id: this.tiketState.length,
-                    name: `BTC - ${this.inputTicket}`,
+                    name: this.inputTicket,
                     price: "111"
                }
-               if(this.inputTicket){
-                    this.tiketState.push(newTicket)
-                    this.inputTicket = ""
+               if (this.checkRepeatName() >= 0) {
+                    this.alertMessage = "Такое имя уже есть"
                } else {
-                    this.alertMessage = "Введите название"
+                    if (this.inputTicket) {
+                         this.tiketState.push(newTicket)
+                         this.inputTicket = ""
+                    } else {
+                         this.alertMessage = "Введите название"
+                    }
                }
           },
           removeAlertMessage(){
@@ -137,7 +142,10 @@ export default {
           },
           removeTicket(idTicket){
                this.tiketState= this.tiketState.filter(e=> e.id !== idTicket)
-          }
+          },
+          checkRepeatName(){
+               return this.tiketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
+          },
      }
 }
 </script>
