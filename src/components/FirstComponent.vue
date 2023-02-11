@@ -56,25 +56,25 @@
                          Добавить
                     </button>
                </section>
-               <template v-if="tiketState.length">
+               <template v-if="ticketState.length">
                     <hr class="w-full border-t border-gray-600 my-4" />
                     <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
                          <div 
-                              v-for="tiket in tiketState" v-bind:key="tiket.id"
-                              v-on:click="checkedTicket = tiket"
-                              v-bind:class="checkedTicket == tiket ? 'border-4' : '' "
+                              v-for="ticket in ticketState" v-bind:key="ticket.id"
+                              v-on:click="checkedTicket = ticket"
+                              v-bind:class="checkedTicket == ticket ? 'border-4' : '' "
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
                               <div class="px-4 py-5 sm:p-6 text-center">
                                    <dt class="text-sm font-medium text-gray-500 truncate">
-                                        BTC - {{ tiket.name }}
+                                        BTC - {{ ticket.name }}
                                    </dt>
                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                                        {{ tiket.price }}
+                                        {{ ticket.price }}
                                    </dd>
                               </div>
                               <div class="w-full border-t border-gray-200"></div>
                               <button
-                                   v-on:click.stop="removeTicket(tiket)"
+                                   v-on:click.stop="removeTicket(ticket)"
                                    class="flex items-center justify-center font-medium w-full bg-gray-100 px-4 py-4 sm:px-6 text-md text-gray-500 hover:text-gray-600 hover:bg-gray-200 hover:opacity-20 transition-all focus:outline-none">
                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                         fill="#718096" aria-hidden="true">
@@ -94,7 +94,7 @@
                          <div class="flex items-end border-gray-600 border-b border-l h-64">
                               <div class="bg-purple-800 border w-10 h-24"></div>
                               <div class="bg-purple-800 border w-10 h-32"></div>
-                              <div class="bg-purple-800 border w-10 h-48"></div>
+                              <div class="bg-purple-800 border w-10 h-64"></div>
                               <div class="bg-purple-800 border w-10 h-16"></div>
                          </div>
                          <button v-on:click="checkedTicket = null" type="button" class="absolute top-0 right-0">
@@ -119,7 +119,7 @@ export default {
      data() {
           return {
                inputTicket: "",
-               tiketState: [],
+               ticketState: [],
                alertMessage: "",
                checkedTicket: null,
           }
@@ -127,7 +127,7 @@ export default {
      methods: {
           addTicket() {
                let newTicket = {
-                    id: this.tiketState.length,
+                    id: this.ticketState.length,
                     name: this.inputTicket,
                     price: "111",
                }
@@ -135,7 +135,7 @@ export default {
                     this.alertMessage = "Такое имя уже есть"
                } else {
                     if (this.inputTicket) {
-                         this.tiketState.push(newTicket)
+                         this.ticketState.push(newTicket)
                          this.inputTicket = ""
                     } else {
                          this.alertMessage = "Введите название"
@@ -146,12 +146,14 @@ export default {
                this.alertMessage = ""
           },
           removeTicket(ticket){
-               console.log(ticket)
-               this.tiketState = this.tiketState.filter(e=> e.id !== ticket.id)
-               if(this.checkedTicket.name === ticket.name)this.checkedTicket = null
+               this.ticketState = this.ticketState.filter(e => e.id !== ticket.id)
+               console.log(this.checkedTicket != false)
+               if(this.checkedTicket != false){
+                    if(this.checkedTicket.name === ticket.name)this.checkedTicket = null
+               }
           },
           checkRepeatName(){
-               return this.tiketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
+               return this.ticketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
           },
      }
 }
