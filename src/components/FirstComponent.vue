@@ -87,15 +87,17 @@
                          </div>
                     </dl>
                     <hr class="w-full border-t border-gray-600 my-4" />
+                    <button v-on:click="addGraph()">Добавить</button>
                     <section v-if="checkedTicket" class="relative">
                          <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
                               BTC - {{ checkedTicket.name }}
                          </h3>
                          <div class="flex items-end border-gray-600 border-b border-l h-64">
-                              <div class="bg-purple-800 border w-10 h-24"></div>
-                              <div class="bg-purple-800 border w-10 h-32"></div>
-                              <div class="bg-purple-800 border w-10 h-64"></div>
-                              <div class="bg-purple-800 border w-10 h-16"></div>
+                              <div
+                              v-for="(graph, idx) in caclGraph()"
+                              v-bind:key="idx"
+                              :style="{height: graph+'%'}"
+                              class="bg-purple-800 border w-10"></div>
                          </div>
                          <button v-on:click="checkedTicket = null" type="button" class="absolute top-0 right-0">
                               
@@ -122,9 +124,14 @@ export default {
                ticketState: [],
                alertMessage: "",
                checkedTicket: null,
+               graphValue: [0, 23, 54, 23, 23, 23,0, 23, 54, 23, 23, 23,0]
           }
      },
      methods: {
+          addGraph(){
+               this.graphValue.push(Math.ceil(Math.random() * 64))
+               console.log(this.graphValue)
+          },
           addTicket() {
                let newTicket = {
                     id: this.ticketState.length,
@@ -155,6 +162,10 @@ export default {
           checkRepeatName(){
                return this.ticketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
           },
+          caclGraph(){
+               return this.graphValue.map(e=> e+1 / (Math.max(...this.graphValue) / 99))
+          }
+          // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
      }
 }
 </script>
