@@ -125,14 +125,13 @@ export default {
                ticketState: [],
                alertMessage: "",
                checkedTicket: null,
-               graphValue: [0, 23, 54, 23, 23, 23,0, 23, 54, 23, 23, 23,0],
+               graphValue: [],
                interval: null,
           }
      },
      methods: {
           addGraph(){
-               this.graphValue.push(Math.ceil(Math.random() * 64))
-               console.log(this.graphValue)
+               this.graphValue.push(Math.ceil(Math.random() * 10000))
           },
           stopInterval(){
                clearInterval(this.interval)
@@ -143,31 +142,30 @@ export default {
                     name: this.inputTicket,
                     price: "-",
                }
-               this.ticketState.push(newTicket)
-               this.interval = setInterval(async()=>{
-                    let tokenGet =  await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicket.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
-                    let token = await tokenGet.json()
-                    console.log(token)
-                    this.ticketState.find(e=> e.name == newTicket.name).price = token.USD.toFixed(2)
-               }, 5000)
-               
-               // if (this.checkRepeatName() >= 0) {
-               //      this.alertMessage = "Такое имя уже есть"
-               // } else {
-               //      if (this.inputTicket) {
-               //           this.ticketState.push(newTicket)
-               //           this.inputTicket = ""
-               //      } else {
-               //           this.alertMessage = "Введите название"
-               //      }
-               // }
+
+               if (this.checkRepeatName() >= 0) {
+                    this.alertMessage = "Такое имя уже есть"
+               } else {
+                    if (this.inputTicket) {
+                         this.ticketState.push(newTicket)
+                         this.interval = setInterval(async () => {
+                              let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicket.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
+                              let token = await tokenGet.json()
+                              this.ticketState.find(e => e.name == newTicket.name).price = token.USD.toFixed(2)
+                              this.graphValue.push(+(token.USD.toFixed(2)))
+                         }, 5000)
+                         this.caclGraph()
+                         this.inputTicket = ""
+                    } else {
+                         this.alertMessage = "Введите название"
+                    }
+               }
           },
           removeAlertMessage(){
                this.alertMessage = ""
           },
           removeTicket(ticket){
                this.ticketState = this.ticketState.filter(e => e.id !== ticket.id)
-               console.log(this.checkedTicket != false)
                if(this.checkedTicket != false){
                     if(this.checkedTicket.name === ticket.name)this.checkedTicket = null
                }
@@ -176,7 +174,7 @@ export default {
                return this.ticketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
           },
           caclGraph(){
-               return this.graphValue.map(e=> e+1 / (Math.max(...this.graphValue) / 99))
+               return this.graphValue.map(e=> 1 + (e  / (Math.max(...this.graphValue) / 99)))
           }
           // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
      }
