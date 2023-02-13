@@ -66,7 +66,7 @@
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
                               <div class="px-4 py-5 sm:p-6 text-center">
                                    <dt class="text-sm font-medium text-gray-500 truncate">
-                                        BTC - {{ ticket.name }}
+                                        USD - {{ ticket.name }}
                                    </dt>
                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">
                                         {{ ticket.price }}
@@ -88,9 +88,10 @@
                     </dl>
                     <hr class="w-full border-t border-gray-600 my-4" />
                     <button v-on:click="addGraph()">Добавить</button>
+                    <button v-on:click="stopInterval()">Остановить</button>
                     <section v-if="checkedTicket" class="relative">
                          <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
-                              BTC - {{ checkedTicket.name }}
+                              USD - {{ checkedTicket.name }}
                          </h3>
                          <div class="flex items-end border-gray-600 border-b border-l h-64">
                               <div
@@ -124,7 +125,8 @@ export default {
                ticketState: [],
                alertMessage: "",
                checkedTicket: null,
-               graphValue: [0, 23, 54, 23, 23, 23,0, 23, 54, 23, 23, 23,0]
+               graphValue: [0, 23, 54, 23, 23, 23,0, 23, 54, 23, 23, 23,0],
+               interval: null,
           }
      },
      methods: {
@@ -132,22 +134,33 @@ export default {
                this.graphValue.push(Math.ceil(Math.random() * 64))
                console.log(this.graphValue)
           },
+          stopInterval(){
+               clearInterval(this.interval)
+          },
           addTicket() {
                let newTicket = {
                     id: this.ticketState.length,
                     name: this.inputTicket,
-                    price: "111",
+                    price: "-",
                }
-               if (this.checkRepeatName() >= 0) {
-                    this.alertMessage = "Такое имя уже есть"
-               } else {
-                    if (this.inputTicket) {
-                         this.ticketState.push(newTicket)
-                         this.inputTicket = ""
-                    } else {
-                         this.alertMessage = "Введите название"
-                    }
-               }
+               this.ticketState.push(newTicket)
+               this.interval = setInterval(async()=>{
+                    let tokenGet =  await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicket.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
+                    let token = await tokenGet.json()
+                    console.log(token)
+                    this.ticketState.find(e=> e.name == newTicket.name).price = token.USD.toFixed(2)
+               }, 5000)
+               
+               // if (this.checkRepeatName() >= 0) {
+               //      this.alertMessage = "Такое имя уже есть"
+               // } else {
+               //      if (this.inputTicket) {
+               //           this.ticketState.push(newTicket)
+               //           this.inputTicket = ""
+               //      } else {
+               //           this.alertMessage = "Введите название"
+               //      }
+               // }
           },
           removeAlertMessage(){
                this.alertMessage = ""
