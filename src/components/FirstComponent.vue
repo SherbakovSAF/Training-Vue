@@ -61,7 +61,7 @@
                     <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
                          <div 
                               v-for="ticket in ticketState" v-bind:key="ticket.id"
-                              v-on:click="checkedTicket = ticket"
+                              v-on:click="updateGraph(ticket)"
                               v-bind:class="checkedTicket == ticket ? 'border-4' : '' "
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
                               <div class="px-4 py-5 sm:p-6 text-center">
@@ -141,6 +141,7 @@ export default {
                     id: this.ticketState.length,
                     name: this.inputTicket,
                     price: "-",
+                    graphTicket: []
                }
 
                if (this.checkRepeatName() >= 0) {
@@ -152,7 +153,13 @@ export default {
                               let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicket.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
                               let token = await tokenGet.json()
                               this.ticketState.find(e => e.name == newTicket.name).price = token.USD.toFixed(2)
-                              this.graphValue.push(+(token.USD.toFixed(2)))
+                              this.ticketState.find(e => e.name == newTicket.name).graphTicket.push(token.USD)
+                              // this.ticketState.find(e => e.name == newTicket.name).graphTicket.push(+(token.USD.toFixed(2)))
+                              // if (this.checkedTicket?.name === newTicket.name) {
+                              //      this.graphValue.push(token.USD);
+                              // }
+                              // this.graphValue.push(+(token.USD.toFixed(2)))
+                              this.graphValue = [...this.checkedTicket.graphTicket]
                          }, 5000)
                          this.caclGraph()
                          this.inputTicket = ""
@@ -174,7 +181,17 @@ export default {
                return this.ticketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
           },
           caclGraph(){
-               return this.graphValue.map(e=> 1 + (e  / (Math.max(...this.graphValue) / 99)))
+               const maxValue = Math.max(...this.graphValue);
+               const minValue = Math.min(...this.graphValue);
+               return this.graphValue.map(
+                    price => 5 + ((price - minValue) * 95) / (maxValue - minValue)
+               );
+               // return this.graphValue.map(e=> 1 + (e  / (Math.max(...this.graphValue) / 99)))
+          },
+          updateGraph(ticket){
+               this.checkedTicket = ticket
+               this.graphValue = [...ticket.graphTicket]
+               // this.graphValue = []
           }
           // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
      }
