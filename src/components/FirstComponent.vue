@@ -21,22 +21,13 @@
                                         placeholder="Например DOGE"
                                         />
                               </div>
-                              <div class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
+                              <div v-if="inputTicket.length"
+                                   class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
                                    <span
+                                        v-for="(ticketName, idx) in ticketTemplate.slice(0,4)"
+                                        v-bind:key="idx"
                                         class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                                        BTC
-                                   </span>
-                                   <span
-                                        class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                                        DOGE
-                                   </span>
-                                   <span
-                                        class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                                        BCH
-                                   </span>
-                                   <span
-                                        class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                                        CHD
+                                        {{ ticketName }}
                                    </span>
                               </div>
                               <div class="text-sm text-red-600">{{ alertMessage }}</div>
@@ -127,6 +118,7 @@ export default {
                checkedTicket: null,
                graphValue: [],
                interval: null,
+               ticketTemplate: []
           }
      },
      methods: {
@@ -194,6 +186,15 @@ export default {
                // this.graphValue = []
           }
           // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
+     },
+     mounted:  async function () {
+               const res = await fetch("https://min-api.cryptocompare.com/data/all/coinlist?summary=true")
+               const resProcess = await res.json()
+               this.ticketTemplate = [...Object.keys(resProcess.Data)]
+          },
+     beforeUpdate: function(){
+          this.ticketTemplate = this.ticketTemplate.filter(e => e.slice(0,this.inputTicket.length) == this.inputTicket)
+          console.log(this.ticketTemplate.filter(e => e.slice(0,this.inputTicket.length) == this.inputTicket))
      }
 }
 </script>
