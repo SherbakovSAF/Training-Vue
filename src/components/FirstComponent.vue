@@ -21,10 +21,10 @@
                                         placeholder="Например DOGE"
                                         />
                               </div>
-                              <div v-if="inputTicket.length"
+                              <div v-if="renderTemplateInput().length > 0 && inputTicket.length"
                                    class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
                                    <span
-                                        v-for="(ticketName, idx) in ticketTemplate.slice(0,4)"
+                                        v-for="(ticketName, idx) in renderTemplateInput().slice(0,4)"
                                         v-bind:key="idx"
                                         class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
                                         {{ ticketName }}
@@ -184,6 +184,9 @@ export default {
                this.checkedTicket = ticket
                this.graphValue = [...ticket.graphTicket]
                // this.graphValue = []
+          },
+          renderTemplateInput(){
+               return this.ticketTemplate.filter(e => e.toLowerCase().slice(0,this.inputTicket.length) == this.inputTicket.toLowerCase())
           }
           // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
      },
@@ -193,8 +196,8 @@ export default {
                this.ticketTemplate = [...Object.keys(resProcess.Data)]
           },
      beforeUpdate: function(){
-          this.ticketTemplate = this.ticketTemplate.filter(e => e.slice(0,this.inputTicket.length) == this.inputTicket)
-          console.log(this.ticketTemplate.filter(e => e.slice(0,this.inputTicket.length) == this.inputTicket))
+          this.renderTemplateInput()
+          
      }
 }
 </script>
