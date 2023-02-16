@@ -25,6 +25,7 @@
                                    class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
                                    <span
                                         v-for="(ticketName, idx) in renderTemplateInput().slice(0,4)"
+                                        @click="addTemplateTicketFromInput(ticketName)"
                                         v-bind:key="idx"
                                         class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
                                         {{ ticketName }}
@@ -135,11 +136,12 @@ export default {
                     price: "-",
                     graphTicket: []
                }
-
+               
                if (this.checkRepeatName() >= 0) {
                     this.alertMessage = "Такое имя уже есть"
                } else {
                     if (this.inputTicket) {
+                         
                          this.ticketState.push(newTicket)
                          this.interval = setInterval(async () => {
                               let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicket.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
@@ -151,7 +153,7 @@ export default {
                               //      this.graphValue.push(token.USD);
                               // }
                               // this.graphValue.push(+(token.USD.toFixed(2)))
-                              this.graphValue = [...this.checkedTicket.graphTicket]
+                              this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
                          }, 5000)
                          this.caclGraph()
                          this.inputTicket = ""
@@ -187,6 +189,10 @@ export default {
           },
           renderTemplateInput(){
                return this.ticketTemplate.filter(e => e.toLowerCase().slice(0,this.inputTicket.length) == this.inputTicket.toLowerCase())
+          },
+          addTemplateTicketFromInput(ticket){
+               this.inputTicket = ticket
+               this.addTicket()
           }
           // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
      },
