@@ -109,6 +109,7 @@
      </div>
 </template>
 <script>
+
 export default {
      name: 'FirstComponent',
      data() {
@@ -129,6 +130,23 @@ export default {
           stopInterval(){
                clearInterval(this.interval)
           },
+          getPrice(newTicketObject) {
+               this.interval = setInterval(async () => {
+                              let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicketObject.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
+                              let token = await tokenGet.json()
+                              this.ticketState.find(e => e.name == newTicketObject.name).price = token.USD.toFixed(2)
+                              this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(token.USD)
+                              // this.ticketState.find(e => e.name == newTicket.name).graphTicket.push(+(token.USD.toFixed(2)))
+                              // if (this.checkedTicket?.name === newTicket.name) {
+                              //      this.graphValue.push(token.USD);
+                              // }
+                              // this.graphValue.push(+(token.USD.toFixed(2)))
+                              this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
+                              localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
+                         }, 5000)
+                         this.caclGraph()
+                         this.inputTicket = ""
+          },
           addTicket() {
                let newTicket = {
                     id: this.ticketState.length,
@@ -141,22 +159,8 @@ export default {
                     this.alertMessage = "Такое имя уже есть"
                } else {
                     if (this.inputTicket) {
-                         
                          this.ticketState.push(newTicket)
-                         this.interval = setInterval(async () => {
-                              let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicket.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
-                              let token = await tokenGet.json()
-                              this.ticketState.find(e => e.name == newTicket.name).price = token.USD.toFixed(2)
-                              this.ticketState.find(e => e.name == newTicket.name).graphTicket.push(token.USD)
-                              // this.ticketState.find(e => e.name == newTicket.name).graphTicket.push(+(token.USD.toFixed(2)))
-                              // if (this.checkedTicket?.name === newTicket.name) {
-                              //      this.graphValue.push(token.USD);
-                              // }
-                              // this.graphValue.push(+(token.USD.toFixed(2)))
-                              this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
-                         }, 5000)
-                         this.caclGraph()
-                         this.inputTicket = ""
+                         this.getPrice(newTicket)
                     } else {
                          this.alertMessage = "Введите название"
                     }
@@ -196,11 +200,20 @@ export default {
           }
           // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
      },
-     mounted:  async function () {
-               const res = await fetch("https://min-api.cryptocompare.com/data/all/coinlist?summary=true")
-               const resProcess = await res.json()
-               this.ticketTemplate = [...Object.keys(resProcess.Data)]
-          },
+     mounted: async function () {
+          const res = await fetch("https://min-api.cryptocompare.com/data/all/coinlist?summary=true")
+          const resProcess = await res.json()
+          this.ticketTemplate = [...Object.keys(resProcess.Data)]
+     },
+     created() {
+          const tickerData = localStorage.getItem("TicketState")
+          if(tickerData){
+               this.ticketState = JSON.parse(tickerData)
+               this.ticketState.forEach(ticker => {
+                    this.getPrice(ticker)
+               })
+          }
+     },
      beforeUpdate: function(){
           this.renderTemplateInput()
           
