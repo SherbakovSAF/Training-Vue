@@ -48,11 +48,28 @@
                          Добавить
                     </button>
                </section>
+               <hr class="w-full border-t border-gray-600 my-4" />
+               <div>
+                    <input 
+                         type="text" 
+                         placeholder="Введите имя для фильтрации" 
+                         v-model="filterInput">
+                    <button 
+                         type="button"
+                         class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                         Назад
+                    </button>
+                    <button 
+                         type="button"
+                         class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                         Вперёд
+                    </button>
+               </div>
                <template v-if="ticketState.length">
                     <hr class="w-full border-t border-gray-600 my-4" />
                     <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
                          <div 
-                              v-for="ticket in ticketState" v-bind:key="ticket.id"
+                              v-for="ticket in filteredTickers()" v-bind:key="ticket.id"
                               v-on:click="updateGraph(ticket)"
                               v-bind:class="checkedTicket == ticket ? 'border-4' : '' "
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
@@ -120,10 +137,15 @@ export default {
                checkedTicket: null,
                graphValue: [],
                interval: null,
-               ticketTemplate: []
+               ticketTemplate: [],
+               page: 1,
+               filterInput: "",
           }
      },
      methods: {
+          filteredTickers(){
+               return this.ticketState.filter(ticker => ticker.name.includes(this.filterInput))
+          },
           addGraph(){
                this.graphValue.push(Math.ceil(Math.random() * 10000))
           },
@@ -134,13 +156,9 @@ export default {
                this.interval = setInterval(async () => {
                               let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicketObject.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
                               let token = await tokenGet.json()
-                              this.ticketState.find(e => e.name == newTicketObject.name).price = token.USD.toFixed(2)
+                              this.ticketState.find(e => e.name == newTicketObject.name).price = token.USD
                               this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(token.USD)
-                              // this.ticketState.find(e => e.name == newTicket.name).graphTicket.push(+(token.USD.toFixed(2)))
-                              // if (this.checkedTicket?.name === newTicket.name) {
-                              //      this.graphValue.push(token.USD);
-                              // }
-                              // this.graphValue.push(+(token.USD.toFixed(2)))
+                              
                               this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
                               localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
                          }, 5000)
@@ -165,6 +183,7 @@ export default {
                          this.alertMessage = "Введите название"
                     }
                }
+               this.filterInput = ""
           },
           removeAlertMessage(){
                this.alertMessage = ""
