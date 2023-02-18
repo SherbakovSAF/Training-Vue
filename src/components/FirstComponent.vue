@@ -56,12 +56,16 @@
                          v-model="filterInput">
                     <button 
                          type="button"
-                         class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                         class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                         @click="page = page - 1"
+                         v-if="page>1">
                          Назад
                     </button>
                     <button 
                          type="button"
-                         class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                         class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                         @click="page = page + 1"
+                         v-if="hasNextPage">
                          Вперёд
                     </button>
                </div>
@@ -69,7 +73,7 @@
                     <hr class="w-full border-t border-gray-600 my-4" />
                     <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
                          <div 
-                              v-for="ticket in filteredTickers()" v-bind:key="ticket.id"
+                              v-for="(ticket, idx) in filteredTickers()" v-bind:key="idx"
                               v-on:click="updateGraph(ticket)"
                               v-bind:class="checkedTicket == ticket ? 'border-4' : '' "
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
@@ -140,11 +144,17 @@ export default {
                ticketTemplate: [],
                page: 1,
                filterInput: "",
+               hasNextPage: true
           }
      },
      methods: {
           filteredTickers(){
-               return this.ticketState.filter(ticker => ticker.name.includes(this.filterInput))
+               const start = (this.page -1) * 6
+               const end = this.page * 6
+               const filteredTickers = this.ticketState
+                    .filter(ticker => ticker.name.includes(this.filterInput))
+               this.hasNextPage = filteredTickers.length > end
+               return filteredTickers.slice(start, end)
           },
           addGraph(){
                this.graphValue.push(Math.ceil(Math.random() * 10000))
@@ -156,8 +166,13 @@ export default {
                this.interval = setInterval(async () => {
                               let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicketObject.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
                               let token = await tokenGet.json()
-                              this.ticketState.find(e => e.name == newTicketObject.name).price = token.USD
-                              this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(token.USD)
+                              if(this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
+                                   this.ticketState.find(e => e.name == newTicketObject.name).price = token.USD
+                              }
+                              if (this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
+                                   this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(token.USD)
+                              }
+                              
                               
                               this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
                               localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
@@ -190,7 +205,7 @@ export default {
           },
           removeTicket(ticket){
                this.ticketState = this.ticketState.filter(e => e.id !== ticket.id)
-               if(this.checkedTicket != false){
+               if(this.checkedTicket != null){
                     if(this.checkedTicket.name === ticket.name)this.checkedTicket = null
                }
           },
