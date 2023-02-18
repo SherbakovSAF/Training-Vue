@@ -53,7 +53,8 @@
                     <input 
                          type="text" 
                          placeholder="Введите имя для фильтрации" 
-                         v-model="filterInput">
+                         v-model="filterInput"
+                         >
                     <button 
                          type="button"
                          class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -130,6 +131,7 @@
      </div>
 </template>
 <script>
+
 
 export default {
      name: 'FirstComponent',
@@ -232,7 +234,6 @@ export default {
                this.inputTicket = ticket
                this.addTicket()
           }
-          // https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR&8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246
      },
      mounted: async function () {
           const res = await fetch("https://min-api.cryptocompare.com/data/all/coinlist?summary=true")
@@ -240,6 +241,13 @@ export default {
           this.ticketTemplate = [...Object.keys(resProcess.Data)]
      },
      created() {
+          const windowData = Object.fromEntries(new URL(window.location).searchParams.entries())
+          if(windowData.filter){
+               this.filterInput = windowData.filter
+          }
+          if(windowData.page){
+               this.page = windowData.page
+          }
           const tickerData = localStorage.getItem("TicketState")
           if(tickerData){
                this.ticketState = JSON.parse(tickerData)
@@ -250,8 +258,17 @@ export default {
      },
      beforeUpdate: function(){
           this.renderTemplateInput()
-          
+     },
+     watch: {
+          filterInput(){
+               this.page = 1
+               window.history.pushState(null, document.title, `${window.location.pathname}?filter=${this.filterInput}&page=${this.page}`)
+          },
+          page(){
+               window.history.pushState(null, document.title, `${window.location.pathname}?filter=${this.filterInput}&page=${this.page}`)
+          }
      }
+     
 }
 </script>
 <style src="../app.css">
