@@ -74,7 +74,7 @@
                     <hr class="w-full border-t border-gray-600 my-4" />
                     <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
                          <div 
-                              v-for="(ticket, idx) in filteredTickers()" v-bind:key="idx"
+                              v-for="(ticket, idx) in paginatedTicker" v-bind:key="idx"
                               v-on:click="updateGraph(ticket)"
                               v-bind:class="checkedTicket == ticket ? 'border-4' : '' "
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
@@ -109,7 +109,7 @@
                          </h3>
                          <div class="flex items-end border-gray-600 border-b border-l h-64">
                               <div
-                              v-for="(graph, idx) in caclGraph()"
+                              v-for="(graph, idx) in normalizedGraph"
                               v-bind:key="idx"
                               :style="{height: graph+'%'}"
                               class="bg-purple-800 border w-10"></div>
@@ -146,18 +146,40 @@ export default {
                ticketTemplate: [],
                page: 1,
                filterInput: "",
-               hasNextPage: true
           }
      },
-     methods: {
-          filteredTickers(){
-               const start = (this.page -1) * 6
-               const end = this.page * 6
-               const filteredTickers = this.ticketState
-                    .filter(ticker => ticker.name.includes(this.filterInput))
-               this.hasNextPage = filteredTickers.length > end
-               return filteredTickers.slice(start, end)
+     computed: {
+          startIndex(){
+               return (this.page -1) * 6
           },
+          endIndex(){
+               return this.page * 6
+          },
+          filteredTickers(){
+               return this.ticketState
+                    .filter(ticker => ticker.name.includes(this.filterInput))
+          },
+          paginatedTicker(){
+               return this.filteredTickers.slice(this.startIndex, this.endIndex)
+          },
+          hasNextPage(){
+               return this.filteredTickers.length > this.endIndex
+          },
+          normalizedGraph(){
+               const maxValue = Math.max(...this.graphValue);
+               const minValue = Math.min(...this.graphValue);
+
+               if(maxValue == minValue){
+                    this.graphValue.map(()=> 50)
+               }
+
+               return this.graphValue.map(
+                    price => 5 + ((price - minValue) * 95) / (maxValue - minValue)
+               );
+          },
+     },
+     methods: {
+          
           addGraph(){
                this.graphValue.push(Math.ceil(Math.random() * 10000))
           },
@@ -179,7 +201,7 @@ export default {
                               this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
                               localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
                          }, 5000)
-                         this.caclGraph()
+                         this.normalizedGraph
                          this.inputTicket = ""
           },
           addTicket() {
@@ -214,14 +236,7 @@ export default {
           checkRepeatName(){
                return this.ticketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
           },
-          caclGraph(){
-               const maxValue = Math.max(...this.graphValue);
-               const minValue = Math.min(...this.graphValue);
-               return this.graphValue.map(
-                    price => 5 + ((price - minValue) * 95) / (maxValue - minValue)
-               );
-               // return this.graphValue.map(e=> 1 + (e  / (Math.max(...this.graphValue) / 99)))
-          },
+          
           updateGraph(ticket){
                this.checkedTicket = ticket
                this.graphValue = [...ticket.graphTicket]
