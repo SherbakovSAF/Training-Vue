@@ -216,12 +216,13 @@ export default {
                     this.alertMessage = "Такое имя уже есть"
                } else {
                     if (this.inputTicket) {
-                         this.ticketState.push(newTicket)
+                         this.ticketState = [...this.ticketState, newTicket]
                          this.getPrice(newTicket)
                     } else {
                          this.alertMessage = "Введите название"
                     }
                }
+               
                this.filterInput = ""
           },
           removeAlertMessage(){
@@ -288,7 +289,9 @@ export default {
           page(){
                window.history.pushState(null, document.title, `${window.location.pathname}?filter=${this.filterInput}&page=${this.page}`)
           },
-
+          ticketState(){
+               localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
+          }
      }
      
 }
