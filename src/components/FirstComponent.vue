@@ -136,6 +136,7 @@
 </template>
 <script>
 
+import {loadTickers} from "../api"
 
 export default {
      name: 'FirstComponent',
@@ -192,23 +193,30 @@ export default {
           clearTicketGraph(){
                this.ticketState.find(e=> e == this.checkedTicket).graphTicket = [50]
           },
-          getPrice(newTicketObject) {
-               this.interval = setInterval(async () => {
-                              let tokenGet = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${newTicketObject.name}&tsyms=USD&api_key=8a2f568b4445642de49bff74fc1df1cca20e845613170855ff41b9bdf6edf246`)
-                              let token = await tokenGet.json()
-                              if(this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
-                                   this.ticketState.find(e => e.name == newTicketObject.name).price = token.USD
-                              }
-                              if (this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
-                                   this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(token.USD)
-                              }
-                              
-                              
-                              this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
-                              localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
-                         }, 5000)
-                         this.normalizedGraph
-                         this.inputTicket = ""
+          async updateTicketState() {
+               if(!this.ticketState.length){
+                    return
+               }
+
+               const exchangeData = await loadTickers(this.ticketState.map(t => t.name))
+               this.ticketState.forEach(ticker =>{
+                    const price = exchangeData[ticker.name.toUpperCase()]
+                    ticker.price = price
+               })
+
+               // if(this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
+               //      this.ticketState.find(e => e.name == newTicketObject.name).price = exchangeData.USD
+               // }
+               // if (this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
+               //      this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(exchangeData.USD)
+               // }
+                    
+                    
+               this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
+               // localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
+     
+               this.normalizedGraph
+               this.inputTicket = ""
           },
           addTicket() {
                let newTicket = {
@@ -223,7 +231,7 @@ export default {
                } else {
                     if (this.inputTicket) {
                          this.ticketState = [...this.ticketState, newTicket]
-                         this.getPrice(newTicket)
+                         // this.updateTicketState(newTicket)
                     } else {
                          this.alertMessage = "Введите название"
                     }
@@ -288,10 +296,9 @@ export default {
           const tickerData = localStorage.getItem("TicketState")
           if(tickerData){
                this.ticketState = JSON.parse(tickerData)
-               this.ticketState.forEach(ticker => {
-                    this.getPrice(ticker)
-               })
           }
+
+          setInterval(this.updateTicketState,5000)
      },
      beforeUpdate: function(){
           this.renderTemplateInput()
