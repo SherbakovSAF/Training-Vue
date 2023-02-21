@@ -181,6 +181,12 @@ export default {
                     price => 5 + ((price - minValue) * 95) / (maxValue - minValue)
                );
           },
+          pageStateOption(){
+               return {
+                    filterInput: this.filterInput,
+                    page: this.page
+               }
+          }
      },
      methods: {
           clearTicketGraph(){
@@ -233,12 +239,10 @@ export default {
                if(this.checkedTicket === ticket){
                     this.checkedTicket = null
                }
-               
           },
           checkRepeatName(){
                return this.ticketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
-          },
-          
+          },     
           updateGraph(ticket){
                this.checkedTicket = ticket
                this.graphValue = [...ticket.graphTicket]
@@ -250,6 +254,22 @@ export default {
           addTemplateTicketFromInput(ticket){
                this.inputTicket = ticket
                this.addTicket()
+          }
+     },
+     watch: {
+          paginatedTicker(){
+               if(this.paginatedTicker.length === 0 && this.page > 1){
+                    this.page -= 1
+               }
+          },
+          filterInput(){
+               this.page = 1
+          },
+          pageStateOption(v){
+               window.history.pushState(null, document.title, `${window.location.pathname}?filter=${v.filterInput}&page=${v.page}`)
+          },
+          ticketState(){
+               localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
           }
      },
      mounted: async function () {
@@ -276,23 +296,7 @@ export default {
      beforeUpdate: function(){
           this.renderTemplateInput()
      },
-     watch: {
-          paginatedTicker(){
-               if(this.paginatedTicker.length === 0 && this.page > 1){
-                    this.page -= 1
-               }
-          },
-          filterInput(){
-               this.page = 1
-               window.history.pushState(null, document.title, `${window.location.pathname}?filter=${this.filterInput}&page=${this.page}`)
-          },
-          page(){
-               window.history.pushState(null, document.title, `${window.location.pathname}?filter=${this.filterInput}&page=${this.page}`)
-          },
-          ticketState(){
-               localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
-          }
-     }
+     
      
 }
 </script>
