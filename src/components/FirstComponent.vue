@@ -70,6 +70,7 @@
                          v-if="hasNextPage">
                          Вперёд
                     </button>
+                    <button @click="stopInterval()">ОСтановит</button>
                </div>
                <template v-if="ticketState.length">
                     <hr class="w-full border-t border-gray-600 my-4" />
@@ -84,7 +85,7 @@
                                         USD - {{ ticket.name }}
                                    </dt>
                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                                        {{ ticket.price }}
+                                        {{ formatPrice(ticket.price) }}
                                    </dd>
                               </div>
                               <div class="w-full border-t border-gray-200"></div>
@@ -190,20 +191,31 @@ export default {
           }
      },
      methods: {
+          stopInterval(){
+               clearInterval(this.interval)
+          },
+          formatPrice(price){
+               if (price == "-"){
+                    return price
+               }
+               return price > 1 ? price.toFixed(2) : price.toPrecision(2)
+          },
           clearTicketGraph(){
                this.ticketState.find(e=> e == this.checkedTicket).graphTicket = [50]
           },
           async updateTicketState() {
+               
                if(!this.ticketState.length){
                     return
                }
 
                const exchangeData = await loadTickers(this.ticketState.map(t => t.name))
+
                this.ticketState.forEach(ticker =>{
                     const price = exchangeData[ticker.name.toUpperCase()]
-                    ticker.price = price
+                    ticker.price = price ?? "-"
                })
-
+               
                // if(this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
                //      this.ticketState.find(e => e.name == newTicketObject.name).price = exchangeData.USD
                // }
@@ -211,10 +223,7 @@ export default {
                //      this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(exchangeData.USD)
                // }
                     
-                    
                this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
-               // localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
-     
                this.normalizedGraph
                this.inputTicket = ""
           },
@@ -298,7 +307,7 @@ export default {
                this.ticketState = JSON.parse(tickerData)
           }
 
-          setInterval(this.updateTicketState,5000)
+          this.interval = setInterval(this.updateTicketState,5000)
      },
      beforeUpdate: function(){
           this.renderTemplateInput()
