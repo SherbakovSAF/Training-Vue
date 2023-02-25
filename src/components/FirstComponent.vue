@@ -77,7 +77,7 @@
                     <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
                          <div 
                               v-for="(ticker, idx) in paginatedTicker" v-bind:key="idx"
-                              v-on:click="updateGraph(ticker)"
+                         
                               v-bind:class="checkedTicker == ticker ? 'border-4' : '' "
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
                               <div class="px-4 py-5 sm:p-6 text-center">
@@ -155,6 +155,7 @@ export default {
           }
      },
      computed: {
+          
           startIndex(){
                return (this.page -1) * 6
           },
@@ -188,9 +189,12 @@ export default {
                     filterInput: this.filterInput,
                     page: this.page
                }
-          }
+          },
      },
      methods: {
+          updateTicker(tickerName, price){
+               this.tickerState.filter(t => t.name == tickerName).forEach(t=>{t.price = price})
+          },
           stopInterval(){
                clearInterval(this.interval)
           },
@@ -247,25 +251,28 @@ export default {
                }
                
                this.filterInput = ""
-               subscribeToTicker(this.inputTicker.name, ()=>{})
+               subscribeToTicker(newTicker.name, newPrice => {
+                    this.updateTicker(newTicker.name, newPrice)}) 
+               
           },
           removeAlertMessage(){
                this.alertMessage = ""
           },
-          removeTicker(ticker){
-               this.tickerState = this.tickerState.filter(e => e.id !== ticker.id)
-               if(this.checkedTicker === ticker){
+          removeTicker(tickerToRemove){
+               this.tickerState = this.tickerState.filter(t => t !== tickerToRemove)
+               if(this.checkedTicker === tickerToRemove){
                     this.checkedTicker = null
                }
+
           },
           checkRepeatName(){
                return this.tickerState.findIndex(e=>e.name.toLowerCase() == this.inputTicker.toLowerCase()) 
           },     
-          updateGraph(ticker){
-               this.checkedTicker = ticker
-               this.graphValue = [...ticker.graphTicket]
-               // this.graphValue = []
-          },
+          // updateGraph(ticker){
+          //      this.checkedTicker = ticker
+          //      this.graphValue = [...ticker.graphTicket]
+          //      // this.graphValue = []
+          // },
           renderTemplateInput(){
                return this.tickerTemplate.filter(e => e.toLowerCase().slice(0,this.inputTicker.length) == this.inputTicker.toLowerCase())
           },
@@ -307,8 +314,12 @@ export default {
           if(tickerData){
                this.tickerState = JSON.parse(tickerData)
                this.tickerState.forEach(ticker => {
-                    subscribeToTicker(ticker.name, ()=>{})
-               })
+                    subscribeToTicker(ticker.name, newPrice => {
+                         this.updateTicker(ticker.name, newPrice)
+                    }
+                    );
+               });
+
           }
 
           // this.interval = setInterval(this.updateTickerState,5000)
