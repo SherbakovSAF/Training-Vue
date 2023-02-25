@@ -13,22 +13,22 @@
                               <label for="wallet" class="block text-sm font-medium text-gray-700">Тикер</label>
                               <div class="mt-1 relative rounded-md shadow-md">
                                    <input
-                                        v-model="inputTicket"
+                                        v-model="inputTicker"
                                         v-on:focus="removeAlertMessage()" 
-                                        v-on:keydown.enter="addTicket()"
+                                        v-on:keydown.enter="addTicker()"
                                         type="text" name="wallet" id="wallet"
                                         class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
                                         placeholder="Например DOGE"
                                         />
                               </div>
-                              <div v-if="renderTemplateInput().length > 0 && inputTicket.length"
+                              <div v-if="renderTemplateInput().length > 0 && inputTicker.length"
                                    class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
                                    <span
-                                        v-for="(ticketName, idx) in renderTemplateInput().slice(0,4)"
-                                        @click="addTemplateTicketFromInput(ticketName)"
+                                        v-for="(tickerName, idx) in renderTemplateInput().slice(0,4)"
+                                        @click="addTemplateTickerFromInput(tickerName)"
                                         v-bind:key="idx"
                                         class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                                        {{ ticketName }}
+                                        {{ tickerName }}
                                    </span>
                               </div>
                               <div class="text-sm text-red-600">{{ alertMessage }}</div>
@@ -36,7 +36,7 @@
                     </div>
                     <button 
                          type="button"
-                         v-on:click="addTicket()"
+                         v-on:click="addTicker()"
                          class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                          <!-- Heroicon name: solid/mail -->
                          <svg class="-ml-0.5 mr-2 h-6 w-6" xmlns="http://www.w3.org/2000/svg" width="30" height="30"
@@ -72,25 +72,25 @@
                     </button>
                     <button @click="stopInterval()">ОСтановит</button>
                </div>
-               <template v-if="ticketState.length">
+               <template v-if="tickerState.length">
                     <hr class="w-full border-t border-gray-600 my-4" />
                     <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
                          <div 
-                              v-for="(ticket, idx) in paginatedTicker" v-bind:key="idx"
-                              v-on:click="updateGraph(ticket)"
-                              v-bind:class="checkedTicket == ticket ? 'border-4' : '' "
+                              v-for="(ticker, idx) in paginatedTicker" v-bind:key="idx"
+                              v-on:click="updateGraph(ticker)"
+                              v-bind:class="checkedTicker == ticker ? 'border-4' : '' "
                               class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
                               <div class="px-4 py-5 sm:p-6 text-center">
                                    <dt class="text-sm font-medium text-gray-500 truncate">
-                                        USD - {{ ticket.name }}
+                                        USD - {{ ticker.name }}
                                    </dt>
                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                                        {{ formatPrice(ticket.price) }}
+                                        {{ formatPrice(ticker.price) }}
                                    </dd>
                               </div>
                               <div class="w-full border-t border-gray-200"></div>
                               <button
-                                   v-on:click.stop="removeTicket(ticket)"
+                                   v-on:click.stop="removeTicker(ticker)"
                                    class="flex items-center justify-center font-medium w-full bg-gray-100 px-4 py-4 sm:px-6 text-md text-gray-500 hover:text-gray-600 hover:bg-gray-200 hover:opacity-20 transition-all focus:outline-none">
                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                         fill="#718096" aria-hidden="true">
@@ -102,9 +102,9 @@
                          </div>
                     </dl>
                     <hr class="w-full border-t border-gray-600 my-4" />
-                    <section v-if="checkedTicket" class="relative">
+                    <section v-if="checkedTicker" class="relative">
                                    <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
-                                        USD - {{ checkedTicket.name }}
+                                        USD - {{ checkedTicker.name }}
                                    </h3>
                                    <div class="flex items-end border-gray-600 border-b border-l h-64">
                                         <div
@@ -113,7 +113,7 @@
                                         :style="{ height: graph + '%' }"
                                         class="bg-purple-800 border w-10"></div>
                                    </div>
-                                   <button v-on:click="checkedTicket = null" type="button" class="absolute top-0 right-0">
+                                   <button v-on:click="checkedTicker = null" type="button" class="absolute top-0 right-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                              xmlns:svgjs="http://svgjs.com/svgjs" version="1.1" width="30" height="30" x="0" y="0"
                                              viewBox="0 0 511.76 511.76" style="enable-background:new 0 0 512 512" xml:space="preserve">
@@ -125,7 +125,7 @@
                                    </button>
                          <button 
                               type="button"
-                              v-on:click="clearTicketGraph()"
+                              v-on:click="clearTickerGraph()"
                               class="w-full my-4 items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                               <!-- Heroicon name: solid/mail -->
                               Очистить график
@@ -137,19 +137,19 @@
 </template>
 <script>
 
-import {loadTickers} from "../api"
+import {subscribeToTicker} from "../api"
 
 export default {
      name: 'FirstComponent',
      data() {
           return {
-               inputTicket: "",
-               ticketState: [],
+               inputTicker: "",
+               tickerState: [],
                alertMessage: "",
-               checkedTicket: null,
+               checkedTicker: null,
                graphValue: [],
                interval: null,
-               ticketTemplate: [],
+               tickerTemplate: [],
                page: 1,
                filterInput: "",
           }
@@ -162,7 +162,7 @@ export default {
                return this.page * 6
           },
           filteredTickers(){
-               return this.ticketState
+               return this.tickerState
                     .filter(ticker => ticker.name.includes(this.filterInput))
           },
           paginatedTicker(){
@@ -200,77 +200,78 @@ export default {
                }
                return price > 1 ? price.toFixed(2) : price.toPrecision(2)
           },
-          clearTicketGraph(){
-               this.ticketState.find(e=> e == this.checkedTicket).graphTicket = [50]
+          clearTickerGraph(){
+               this.tickerState.find(e=> e == this.checkedTicker).graphTicket = [50]
           },
-          async updateTicketState() {
+          async updateTickerState() {
                
-               if(!this.ticketState.length){
-                    return
-               }
-
-               const exchangeData = await loadTickers(this.ticketState.map(t => t.name))
-
-               this.ticketState.forEach(ticker =>{
-                    const price = exchangeData[ticker.name.toUpperCase()]
-                    ticker.price = price ?? "-"
-               })
-               
-               // if(this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
-               //      this.ticketState.find(e => e.name == newTicketObject.name).price = exchangeData.USD
+               // if(!this.tickerState.length){
+               //      return
                // }
-               // if (this.ticketState.find(e => e.name == newTicketObject.name) != undefined){
-               //      this.ticketState.find(e => e.name == newTicketObject.name).graphTicket.push(exchangeData.USD)
+
+               // const exchangeData = await loadTickers(this.tickerState.map(t => t.name))
+
+               // this.tickerState.forEach(ticker =>{
+               //      const price = exchangeData[ticker.name.toUpperCase()]
+               //      ticker.price = price ?? "-"
+               // })
+               
+               // if(this.tickerState.find(e => e.name == newTicketObject.name) != undefined){
+               //      this.tickerState.find(e => e.name == newTicketObject.name).price = exchangeData.USD
+               // }
+               // if (this.tickerState.find(e => e.name == newTicketObject.name) != undefined){
+               //      this.tickerState.find(e => e.name == newTicketObject.name).graphTicket.push(exchangeData.USD)
                // }
                     
-               this.checkedTicket != null ? this.graphValue = [...this.checkedTicket.graphTicket] : this.graphValue = []
-               this.normalizedGraph
-               this.inputTicket = ""
+               // this.checkedTicker != null ? this.graphValue = [...this.checkedTicker.graphTicket] : this.graphValue = []
+               // this.normalizedGraph
+               // this.inputTicker = ""
           },
-          addTicket() {
-               let newTicket = {
-                    id: this.ticketState.length,
-                    name: this.inputTicket,
+          addTicker() {
+               let newTicker = {
+                    id: this.tickerState.length,
+                    name: this.inputTicker,
                     price: "-",
-                    graphTicket: []
+                    graphTicker: []
                }
                
                if (this.checkRepeatName() >= 0) {
                     this.alertMessage = "Такое имя уже есть"
                } else {
-                    if (this.inputTicket) {
-                         this.ticketState = [...this.ticketState, newTicket]
-                         // this.updateTicketState(newTicket)
+                    if (this.inputTicker) {
+                         this.tickerState = [...this.tickerState, newTicker]
+                         // this.updateTickerState(newTicket)
                     } else {
                          this.alertMessage = "Введите название"
                     }
                }
                
                this.filterInput = ""
+               subscribeToTicker(this.inputTicker.name, ()=>{})
           },
           removeAlertMessage(){
                this.alertMessage = ""
           },
-          removeTicket(ticket){
-               this.ticketState = this.ticketState.filter(e => e.id !== ticket.id)
-               if(this.checkedTicket === ticket){
-                    this.checkedTicket = null
+          removeTicker(ticker){
+               this.tickerState = this.tickerState.filter(e => e.id !== ticker.id)
+               if(this.checkedTicker === ticker){
+                    this.checkedTicker = null
                }
           },
           checkRepeatName(){
-               return this.ticketState.findIndex(e=>e.name.toLowerCase() == this.inputTicket.toLowerCase()) 
+               return this.tickerState.findIndex(e=>e.name.toLowerCase() == this.inputTicker.toLowerCase()) 
           },     
-          updateGraph(ticket){
-               this.checkedTicket = ticket
-               this.graphValue = [...ticket.graphTicket]
+          updateGraph(ticker){
+               this.checkedTicker = ticker
+               this.graphValue = [...ticker.graphTicket]
                // this.graphValue = []
           },
           renderTemplateInput(){
-               return this.ticketTemplate.filter(e => e.toLowerCase().slice(0,this.inputTicket.length) == this.inputTicket.toLowerCase())
+               return this.tickerTemplate.filter(e => e.toLowerCase().slice(0,this.inputTicker.length) == this.inputTicker.toLowerCase())
           },
-          addTemplateTicketFromInput(ticket){
-               this.inputTicket = ticket
-               this.addTicket()
+          addTemplateTickerFromInput(ticker){
+               this.inputTicker = ticker
+               this.addTicker()
           }
      },
      watch: {
@@ -285,14 +286,14 @@ export default {
           pageStateOption(v){
                window.history.pushState(null, document.title, `${window.location.pathname}?filter=${v.filterInput}&page=${v.page}`)
           },
-          ticketState(){
-               localStorage.setItem("TicketState", JSON.stringify(this.ticketState))
+          tickerState(){
+               localStorage.setItem("tickerState", JSON.stringify(this.tickerState))
           }
      },
      mounted: async function () {
           const res = await fetch("https://min-api.cryptocompare.com/data/all/coinlist?summary=true")
           const resProcess = await res.json()
-          this.ticketTemplate = [...Object.keys(resProcess.Data)]
+          this.tickerTemplate = [...Object.keys(resProcess.Data)]
      },
      created() {
           const windowData = Object.fromEntries(new URL(window.location).searchParams.entries())
@@ -302,12 +303,15 @@ export default {
           if(windowData.page){
                this.page = windowData.page
           }
-          const tickerData = localStorage.getItem("TicketState")
+          const tickerData = localStorage.getItem("tickerState")
           if(tickerData){
-               this.ticketState = JSON.parse(tickerData)
+               this.tickerState = JSON.parse(tickerData)
+               this.tickerState.forEach(ticker => {
+                    subscribeToTicker(ticker.name, ()=>{})
+               })
           }
 
-          this.interval = setInterval(this.updateTicketState,5000)
+          // this.interval = setInterval(this.updateTickerState,5000)
      },
      beforeUpdate: function(){
           this.renderTemplateInput()
