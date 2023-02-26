@@ -137,7 +137,7 @@
 </template>
 <script>
 
-import {subscribeToTicker} from "../api"
+import {subscribeToTicker, unsubscribeFromTicker} from "../api"
 
 export default {
      name: 'FirstComponent',
@@ -264,6 +264,7 @@ export default {
                     this.checkedTicker = null
                }
 
+               unsubscribeFromTicker(tickerToRemove.name)
           },
           checkRepeatName(){
                return this.tickerState.findIndex(e=>e.name.toLowerCase() == this.inputTicker.toLowerCase()) 
