@@ -6,12 +6,13 @@ const socket = new WebSocket(`wss://streamer.cryptocompare.com/v2?api_key=${API_
 const AGGREGATE_INDEX = '5'
 
 socket.addEventListener('message', e=>{
-    
     const {TYPE: type, FROMSYMBOL: currency, PRICE: newPrice} = JSON.parse(e.data)
+    if(newPrice == undefined){
+        return
+    }
     if(type != AGGREGATE_INDEX){
         return 
     }
-    console.log(currency, newPrice)
     const handlers = tickersHandlers.get(currency) ?? []
     handlers.forEach(fn => fn(newPrice))
 })
