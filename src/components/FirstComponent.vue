@@ -250,9 +250,11 @@ export default {
                     }
                }
                
-               this.filterInput = ""
+               
                subscribeToTicker(newTicker.name, newPrice => {
                     this.updateTicker(newTicker.name, newPrice)}) 
+               this.filterInput = ""
+               this.inputTicker = ""
                
           },
           removeAlertMessage(){
