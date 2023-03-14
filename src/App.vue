@@ -85,12 +85,13 @@
                          </div>
                     </dl>
                     <hr class="w-full border-t border-gray-600 my-4" />
+                    <!-- График -->
                     <section v-if="checkedTicker" class="relative">
                          <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
                               USD - {{ checkedTicker.name }}
                          </h3>
                          <div class="flex items-end border-gray-600 border-b border-l h-64" ref="graphWrap">
-                              <div v-for="(graph, idx) in normalizedGraph" v-bind:key="idx" :style="{ height: graph + '%'}" ref="graphPoints"
+                              <div v-for="(graph, idx) in normalizedGraph" v-bind:key="idx" style="width: 38px" :style="{ height: graph + '%'}" ref="graphPoints"
                                    class="bg-purple-800 border w-10"></div>
                          </div>
                          <button v-on:click="checkedTicker = null" type="button" class="absolute top-0 right-0">
@@ -126,7 +127,7 @@ export default {
                tickerTemplate: [],
                page: 1,
                filterInput: "",
-               trueValueWidth: 38,
+               trueValueWidth: null,
                maxGraphElements: 1,
           }
      },
@@ -174,12 +175,13 @@ export default {
                
                if(this.checkedTicker){
                     this.graphValue = [...this.checkedTicker.graphTicker]
+                    this.$nextTick().then(this.trueValueWidth = +this.$refs.graphPoints[0].style.width.replace(/\D/g, ""))
+                    // this.trueValueWidth = +(this.$refs.graphPoints.style.width)
                } else {
                     return
                }
                
                if(this.calcWidthGraph() <= this.graphValue.length){
-                    // console.log(this.calcWidthGraph, this.graphValue.length)
                     this.filterGraphValue()
                }
           },
@@ -263,7 +265,10 @@ export default {
           },
           pageStateOption(v) {
                window.history.pushState(null, document.title, `${window.location.pathname}?filter=${v.filterInput}&page=${v.page}`)
-          },          
+          },     
+          tickerState(){
+               localStorage.setItem("tickerState", JSON.stringify(this.tickerState))
+          },
      },
      created() {
           const windowData = Object.fromEntries(new URL(window.location).searchParams.entries())
@@ -274,6 +279,7 @@ export default {
                this.page = windowData.page
           }
           const tickerData = localStorage.getItem("tickerState")
+
           if (tickerData) {
                this.tickerState = JSON.parse(tickerData)
                this.tickerState.forEach(ticker => {
@@ -282,7 +288,7 @@ export default {
                     }
                     );
                });
-          }
+          }          
      },
      beforeUpdate: function () {
           this.renderTemplateInput()
