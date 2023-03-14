@@ -89,8 +89,8 @@
                          <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
                               USD - {{ checkedTicker.name }}
                          </h3>
-                         <div class="flex items-end border-gray-600 border-b border-l h-64">
-                              <div v-for="(graph, idx) in normalizedGraph" v-bind:key="idx" :style="{ height: graph + '%' }"
+                         <div class="flex items-end border-gray-600 border-b border-l h-64" ref="graphWrap">
+                              <div v-for="(graph, idx) in normalizedGraph" v-bind:key="idx" :style="{ height: graph + '%'}" ref="graphPoints"
                                    class="bg-purple-800 border w-10"></div>
                          </div>
                          <button v-on:click="checkedTicker = null" type="button" class="absolute top-0 right-0">
@@ -121,11 +121,13 @@ export default {
                tickerState: [],
                alertMessage: "",
                checkedTicker: null,
-               graphValue: [],
+               graphValue: [1],
                interval: null,
                tickerTemplate: [],
                page: 1,
                filterInput: "",
+               trueValueWidth: 38,
+               maxGraphElements: 1,
           }
      },
      computed: {
@@ -163,13 +165,32 @@ export default {
                     page: this.page
                }
           },
+          
+          
      },
      methods: {
           updateTicker(tickerName, price) {
                this.tickerState.filter(t => t.name == tickerName).forEach(t => { t.price = price, t.graphTicker.push(price) })
-               if (this.checkedTicker != null) {
+               
+               if(this.checkedTicker){
                     this.graphValue = [...this.checkedTicker.graphTicker]
+               } else {
+                    return
                }
+               
+               if(this.calcWidthGraph() <= this.graphValue.length){
+                    // console.log(this.calcWidthGraph, this.graphValue.length)
+                    this.filterGraphValue()
+               }
+          },
+          calcWidthGraph(){
+               // Вычисляет сколько пунктов может поместиться в окне с графиков
+               let widthGraphWrap = this.$refs.graphWrap.clientWidth
+               console.log(Math.floor(widthGraphWrap / this.trueValueWidth))
+               return Math.ceil(widthGraphWrap / this.trueValueWidth)
+          },
+          filterGraphValue(){
+               this.graphValue = [...this.graphValue].slice(-this.calcWidthGraph(), -1)
           },
           formatPrice(price) {
                if (price == "-") {
@@ -220,7 +241,7 @@ export default {
           },
           updateGraph(ticker){
                this.checkedTicker = ticker
-               this.graphValue = [...this.tickerState.find(e => e.name == ticker.name).graphTicker]
+               // this.graphValue = [...this.tickerState.find(e => e.name == ticker.name).graphTicker]
                
           },
           renderTemplateInput() {
@@ -242,19 +263,7 @@ export default {
           },
           pageStateOption(v) {
                window.history.pushState(null, document.title, `${window.location.pathname}?filter=${v.filterInput}&page=${v.page}`)
-          },
-          tickerState() {
-               localStorage.setItem("tickerState", JSON.stringify(this.tickerState))
-          },
-          graphValue(){
-               localStorage.setItem("tickerState", JSON.stringify(this.tickerState))
-          },
-          
-     },
-     mounted: async function () {
-          const res = await fetch("https://min-api.cryptocompare.com/data/all/coinlist?summary=true")
-          const resProcess = await res.json()
-          this.tickerTemplate = [...Object.keys(resProcess.Data)]
+          },          
      },
      created() {
           const windowData = Object.fromEntries(new URL(window.location).searchParams.entries())
@@ -273,7 +282,6 @@ export default {
                     }
                     );
                });
-
           }
      },
      beforeUpdate: function () {
